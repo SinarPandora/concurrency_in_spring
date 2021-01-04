@@ -6,6 +6,7 @@ import java.util.concurrent.Semaphore;
 import com.kingland.lunch.learn.demo.model.Person;
 import com.kingland.lunch.learn.demo.repository.PersonRepository;
 import com.kingland.lunch.learn.demo.service.AppService;
+import com.kingland.lunch.learn.demo.service.DemoService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -18,7 +19,8 @@ import reactor.core.publisher.Flux;
 @RestController
 public class AppController {
     private final @NonNull PersonRepository repo;
-    private final @NonNull AppService service;
+    private final @NonNull AppService appService;
+    private final @NonNull DemoService demoService;
     private final Semaphore semaphore = new Semaphore(1);
 
     @GetMapping("/print_and_wait")
@@ -55,19 +57,24 @@ public class AppController {
     
     @GetMapping("/waiting")
     public String waiting() {
-        service.waiting();
+        appService.waiting();
         return "Finished";
     }
     
     @GetMapping("/cpu")
     public CompletableFuture<Long> calc() {
-        service.cpuCalcTask(45);
-        service.cpuCalcTask(45);
-        return service.cpuCalcTask(45);
+        appService.cpuCalcTask(45);
+        appService.cpuCalcTask(45);
+        return appService.cpuCalcTask(45);
     }
     
-    @GetMapping("/io")
-    public CompletableFuture<Integer> httpCall() {
-        return service.batchHttpCall(3, 10);
+    @GetMapping("/io/1")
+    public CompletableFuture<Integer> httpCall1() {
+        return appService.batchHttpCall(3, 10);
+    }
+
+    @GetMapping("/io/2")
+    public CompletableFuture<Integer> httpCall2() {
+        return demoService.batchHttpCall(3, 10);
     }
 }

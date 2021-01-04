@@ -3,20 +3,13 @@ package com.kingland.lunch.learn.demo.service;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionService;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import io.vavr.API;
-import io.vavr.Patterns;
-import io.vavr.Predicates;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -40,22 +33,12 @@ public class AppService {
         return CompletableFuture.completedFuture(uncachedFib(n));
     }
 
-//    @Async("defaultIOExecutor")
-//    public CompletableFuture<Integer> multiHttpCall(int delay) {
-//        // CompletableFuture::thenApply need an ExecuteContext so this method should carry @Async
-//        return CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[0])).thenApply(v -> {
-//            log.info(String.format("[%s] Collecting results...", Thread.currentThread().getName()));
-//            Optional<Integer> result = asyncTasks.stream().map(CompletableFuture::join).reduce(Integer::sum);
-//            return result.orElse(0);
-//        });
-//    }
-
 
     @Async("defaultIOExecutor")
     public CompletableFuture<Integer> batchHttpCall(int delay, int times) {
         log.info(String.format("[%s] Launch tasks...", Thread.currentThread().getName()));
         List<CompletableFuture<Integer>> asyncTasks = IntStream.range(0, times)
-                .mapToObj(id -> asyncHttpCall1(delay, id)).collect(Collectors.toList());
+                .mapToObj(id -> httpCallAsync(delay, id)).collect(Collectors.toList());
 
         // CompletableFuture::thenApply need an ExecuteContext so this method should carry @Async
         return CompletableFuture.allOf(asyncTasks.toArray(new CompletableFuture[0])).thenApply(v -> {
@@ -66,7 +49,7 @@ public class AppService {
     }
 
     @Async("defaultIOExecutor")
-    CompletableFuture<Integer> asyncHttpCall1(int delay, int id) {
+    CompletableFuture<Integer> httpCallSeq(int delay, int id) {
         String url = String.format("https://httpbin.org/delay/%s", delay);
         log.info(String.format("[%s] Start http call...", id));
         httpClient.getForEntity(url, Map.class);
@@ -75,7 +58,7 @@ public class AppService {
     }
     
     @Async("defaultIOExecutor")
-    CompletableFuture<Integer> asyncHttpCall2(int delay, int id) {
+    CompletableFuture<Integer> httpCallAsync(int delay, int id) {
         return CompletableFuture.supplyAsync(() -> {
             String url = String.format("https://httpbin.org/delay/%s", delay);
             log.info(String.format("[%s] Start http call...", id));
@@ -119,8 +102,7 @@ public class AppService {
         if (n <= 1) {
             return n;
         }
-        long i = 0;
-        long j = 0;
+        long i, j;
         if (cache.containsKey(n - 1)) {
             i = cache.get(n - 1);
         } else {
