@@ -56,4 +56,9 @@ public class AppController {
     public CompletableFuture<Integer> httpCall2() {
         return demoService.batchHttpCall(3, 10);
     }
+
+    @GetMapping("/error")
+    public void error() {
+        appService.error();
+    }
 }

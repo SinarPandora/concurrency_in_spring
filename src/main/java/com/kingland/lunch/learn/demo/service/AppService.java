@@ -42,7 +42,6 @@ public class AppService {
         return CompletableFuture.completedFuture(uncachedFib(n));
     }
 
-
     @Async("defaultIOExecutor")
     public CompletableFuture<Integer> batchHttpCall(int delay, int times) {
         log.info(String.format("[%s] Launch tasks...", Thread.currentThread().getName()));
@@ -75,6 +74,11 @@ public class AppService {
             log.info(String.format("[%s] Finish http call...", id));
             return 1;
         });
+    }
+
+    @Async("defaultCalcExecutor")
+    public void error() {
+        throw new RuntimeException("Error thrown");
     }
 
     /**

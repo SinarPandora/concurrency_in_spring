@@ -69,7 +69,7 @@ public class ExecutionContextConfiguration {
     @Bean("defaultTaskScheduler")
     public TaskScheduler defaultTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-        scheduler.setPoolSize(100);
+        scheduler.setPoolSize(10);
         scheduler.setThreadNamePrefix("app-scheduler");
         scheduler.initialize();
         return scheduler;
