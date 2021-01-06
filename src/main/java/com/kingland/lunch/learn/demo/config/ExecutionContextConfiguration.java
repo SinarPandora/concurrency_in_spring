@@ -5,9 +5,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+@EnableScheduling
 @EnableAsync // <- enable @Async
 @Configuration
 public class ExecutionContextConfiguration {
@@ -60,5 +64,14 @@ public class ExecutionContextConfiguration {
         // ------------------------ END ----------------------------//
         executor.initialize();
         return executor;
+    }
+
+    @Bean("defaultTaskScheduler")
+    public TaskScheduler defaultTaskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(100);
+        scheduler.setThreadNamePrefix("app-scheduler");
+        scheduler.initialize();
+        return scheduler;
     }
 }

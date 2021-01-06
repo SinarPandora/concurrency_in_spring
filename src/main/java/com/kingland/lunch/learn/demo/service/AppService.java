@@ -1,18 +1,22 @@
 package com.kingland.lunch.learn.demo.service;
 
 
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Log
 @AllArgsConstructor
@@ -26,6 +30,11 @@ public class AppService {
         Thread.sleep(10000);
         log.info("Finish waiting");
         return true;
+    }
+
+    @Scheduled(fixedRate = 3000)
+    public void sayHello() {
+        log.info(String.format("Hello from %s", Thread.currentThread().getName()));
     }
 
     @Async("defaultCalcExecutor")
@@ -56,7 +65,7 @@ public class AppService {
         log.info(String.format("[%s] Finish http call...", id));
         return CompletableFuture.completedFuture(1);
     }
-    
+
     @Async("defaultIOExecutor")
     CompletableFuture<Integer> httpCallAsync(int delay, int id) {
         return CompletableFuture.supplyAsync(() -> {

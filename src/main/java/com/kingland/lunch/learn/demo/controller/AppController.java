@@ -21,7 +21,6 @@ public class AppController {
     private final @NonNull PersonRepository repo;
     private final @NonNull AppService appService;
     private final @NonNull DemoService demoService;
-    private final Semaphore semaphore = new Semaphore(1);
 
     @GetMapping("/print_and_wait")
     public String printAndWait() throws InterruptedException {
@@ -29,45 +28,25 @@ public class AppController {
         Thread.sleep(100_000);
         return "DONE";
     }
-    
-    @GetMapping("/print_and_lock")
-    public String printAndLock() throws InterruptedException {
-        System.out.printf("Current Thread is %s%n", Thread.currentThread().getName());
-        semaphore.acquire();
-        semaphore.release();
-        return "DONE";
-    }
-    
-    @GetMapping("/lock")
-    public String lockIt() throws InterruptedException {
-        semaphore.acquire();
-        return "Request has been locked, you can use /unlock to unlock it";
-    }
 
-    @GetMapping("/unlock")
-    public String unlockIt() {
-        semaphore.release();
-        return "Request Unlocked";
-    }
-    
     @GetMapping("/listAll")
     public Flux<Person> listAllPeople() {
         return repo.findAll();
     }
-    
+
     @GetMapping("/waiting")
     public String waiting() {
         appService.waiting();
         return "Finished";
     }
-    
+
     @GetMapping("/cpu")
     public CompletableFuture<Long> calc() {
         appService.cpuCalcTask(45);
         appService.cpuCalcTask(45);
         return appService.cpuCalcTask(45);
     }
-    
+
     @GetMapping("/io/1")
     public CompletableFuture<Integer> httpCall1() {
         return appService.batchHttpCall(3, 10);
